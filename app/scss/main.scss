@@ -1,27 +1,32 @@
-$font-stack: Helvetica, sans-serif;
-$background: #ddd;
-$light-background: #e6e6e6;
-$text-color: #111;
-$primary-color: #1d781d;
-$secondary-color: #781D78;
-$form-background-color: #ccc;
-$form-text-color: #333;
-$muted-color: #555; // solarized comment text
+$font-stack: "Supreme-variable", "Segoe UI", Helvetica, sans-serif;
+$font-stack-alt: "Technor-variable", "Times New Roman", Times, serif;
+$background: #171717;
+$light-background: #383838;
+$text-color: #FFF;
+$primary-color: #7D56F3;
+$secondary-color: #F25D93;
+$form-background-color: #333;
+$form-text-color: #CCC;
+$muted-color: #999; // solarized comment text
 $primary-button-text-color: #fff;
 $code-highlight-background: #f0f0f0;
 
+@import url("supreme.css");
+@import url("technor.css");
+
 // Load custom theme
-@import "theme.scss";
+// @import "theme.scss";
 
 .primary-color {
   color: $primary-color;
 }
 
-#admin {
-  .admin-menu {
-    margin-bottom: 30px;
-    padding: 0 20px;
-  }
+#navbar {
+  background: #333;
+  border-radius: 0 0 16px 16px;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 .empty-state {
@@ -165,6 +170,12 @@ code, pre {
   font-family: monospace;
 }
 
+pre.cat {
+  display: flex;
+  align-self: flex-end;
+  margin-bottom: 2px;
+}
+
 .form {
     input, select, textarea {
         font-size: 20px;
@@ -213,7 +224,8 @@ a {
 }
 #main {
     display: flex;
-    flex: 1; 
+    flex: 1;
+    margin: 0 20px;
 }
 main {
     width: 100%;
@@ -224,6 +236,8 @@ main {
 .main-flex {
     display: flex;
     flex: 1;
+    flex-direction: column;
+    margin: 0 auto;
 }
 
 .centered {
@@ -239,10 +253,14 @@ main {
 footer {
   width: 100%;
   max-width: 1000px;
-  margin: 20px auto;
+  margin: 0 auto;
+  padding: 10px 0;
   color: $muted-color;
+  outline: 4px solid $form-background-color;
+  outline-offset: -4px;
+  border-radius: 16px 16px 0 0;
   p {
-    margin: 0;    
+    margin: 0;
   }
 }
 .tiny-actor-icon {
@@ -322,6 +340,15 @@ footer {
   float: right;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font-stack-alt;
+  font-weight: 400;
+  margin: 0;
+  padding: 0;
+  line-height: 1.2em;
+  margin-bottom: 0.5em;
+}
+
 ul.poll-items {
   list-style-type: none;
   padding: 0;
@@ -371,6 +398,8 @@ nav {
 }
 
 nav.flexbox {
+    margin: 10px 20px;
+
     ul {        
         display: flex;
         flex-wrap: wrap;

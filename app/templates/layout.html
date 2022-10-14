@@ -13,32 +13,36 @@
 {% block head %}{% endblock %}
 </head>
 <body>
+<div id="navbar">
+    {% macro admin_link(url, text) %}
+    {% set url_for = request.app.router.url_path_for(url) %}
+    <a href="{{ url_for }}" {% if request.url.path == url_for %}class="active"{% endif %}>{{ text }}</a>
+    {% endmacro %}
+    <nav class="flexbox">
+        <ul>
+            <li>{{ admin_link("index", "Home") }}</li>
+            <li>{{ admin_link("notes", "Notes") }}</li>
+            <li>{{ admin_link("articles", "Articles") }}</li>
+            <!-- Contact -->
+            <!-- PGP -->
+        </ul>
+        {% if is_admin %}
+        <hr>
+        <ul>
+            <li>{{ admin_link("admin_new", "New") }}</li>
+            <li>{{ admin_link("admin_stream", "Stream") }}</li>
+            <li>{{ admin_link("admin_inbox", "Inbox") }} / {{ admin_link("admin_outbox", "Outbox") }}</li>
+            <li>{{ admin_link("admin_direct_messages", "DMs") }}</li>
+            <li>{{ admin_link("get_notifications", "Notifications") }} {% if notifications_count %}({{ notifications_count }}){% endif %}</li>
+            <li>{{ admin_link("get_lookup", "Lookup") }}</li>
+            <li>{{ admin_link("admin_bookmarks", "Bookmarks") }}</li>
+            <li><a href="{{ url_for("logout")}}">Logout</a></li>
+        </ul>
+        {% endif %}
+    </nav>
+</div>
 <div id="main">
 <main{%- block main_tag %}{%- endblock %}>
-{% if is_admin %}
-<div id="admin">
-{% macro admin_link(url, text) %}
-{% set url_for = request.app.router.url_path_for(url) %}
-<a href="{{ url_for }}" {% if request.url.path == url_for %}class="active"{% endif %}>{{ text }}</a>
-{% endmacro %}
-<div class="admin-menu">
-<nav class="flexbox">
-    <ul>
-        <li>{{ admin_link("index", "Public") }}</li>
-        <li>{{ admin_link("admin_new", "New") }}</li>
-        <li>{{ admin_link("admin_stream", "Stream") }}</li>
-        <li>{{ admin_link("admin_inbox", "Inbox") }} / {{ admin_link("admin_outbox", "Outbox") }}</li>
-        <li>{{ admin_link("admin_direct_messages", "DMs") }}</li>
-        <li>{{ admin_link("get_notifications", "Notifications") }} {% if notifications_count %}({{ notifications_count }}){% endif %}</li>
-        <li>{{ admin_link("get_lookup", "Lookup") }}</li>
-        <li>{{ admin_link("admin_bookmarks", "Bookmarks") }}</li>
-        <li><a href="{{ url_for("logout")}}">Logout</a></li>
-    </ul>
-</nav>
-</div>
-
-</div>
-{% endif %}
 {% block content %}{% endblock %}
 </main>
 </div>
@@ -54,6 +58,10 @@
 </footer>
 {% if is_admin %}
 <script src="/static/common-admin.js?v={{ JS_HASH }}"></script>
+{% endif %}
+{% if not has_dnt %}
+<script async defer src="https://sa.dj.je/latest.js"></script>
+<noscript><img src="https://sa.dj.je/noscript.gif" alt="" referrerpolicy="no-referrer-when-downgrade" /></noscript>
 {% endif %}
 </body>
 </html>

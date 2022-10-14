@@ -222,8 +222,8 @@ async def custom_http_exception_handler(
         async with async_session() as db_session:
             title = (
                 {
-                    404: "Oops, nothing to see here",
-                    500: "Oops, something went wrong",
+                    404: "oops, nothing to see here.",
+                    500: "oops, something went wrong.",
                 }
             ).get(exc.status_code, exc.detail)
             try:
@@ -243,8 +243,79 @@ class ActivityPubResponse(JSONResponse):
     media_type = "application/activity+json"
 
 
+# @app.get("/")
+# async def index(
+#     request: Request,
+#     db_session: AsyncSession = Depends(get_db_session),
+#     _: httpsig.HTTPSigInfo = Depends(httpsig.httpsig_checker),
+#     page: int | None = None,
+# ) -> templates.TemplateResponse | ActivityPubResponse:
+#     if is_activitypub_requested(request):
+
+#         return ActivityPubResponse(LOCAL_ACTOR.ap_actor)
+
+#     page = page or 1
+#     where = (
+#         models.OutboxObject.visibility == ap.VisibilityEnum.PUBLIC,
+#         models.OutboxObject.is_deleted.is_(False),
+#         models.OutboxObject.is_hidden_from_homepage.is_(False),
+#         models.OutboxObject.ap_type != "Article",
+#     )
+#     q = select(models.OutboxObject).where(*where)
+#     total_count = await db_session.scalar(
+#         select(func.count(models.OutboxObject.id)).where(*where)
+#     )
+#     page_size = 20
+#     page_offset = (page - 1) * page_size
+
+#     outbox_objects_result = await db_session.scalars(
+#         q.options(
+#             joinedload(models.OutboxObject.outbox_object_attachments).options(
+#                 joinedload(models.OutboxObjectAttachment.upload)
+#             ),
+#             joinedload(models.OutboxObject.relates_to_inbox_object).options(
+#                 joinedload(models.InboxObject.actor),
+#             ),
+#             joinedload(models.OutboxObject.relates_to_outbox_object).options(
+#                 joinedload(models.OutboxObject.outbox_object_attachments).options(
+#                     joinedload(models.OutboxObjectAttachment.upload)
+#                 ),
+#             ),
+#         )
+#         .order_by(models.OutboxObject.is_pinned.desc())
+#         .order_by(models.OutboxObject.ap_published_at.desc())
+#         .offset(page_offset)
+#         .limit(page_size)
+#     )
+#     outbox_objects = outbox_objects_result.unique().all()
+
+#     return await templates.render_template(
+#         db_session,
+#         request,
+#         "index.html",
+#         {
+#             "request": request,
+#             "objects": outbox_objects,
+#             "current_page": page,
+#             "has_next_page": page_offset + len(outbox_objects) < total_count,
+#             "has_previous_page": page > 1,
+#         },
+#     )
+
 @app.get("/")
 async def index(
+    request: Request,
+    db_session: AsyncSession = Depends(get_db_session),
+) -> templates.TemplateResponse:
+    return await templates.render_template(
+        db_session,
+        request,
+        "index.html",
+        {},
+    )
+
+@app.get("/notes")
+async def notes(
     request: Request,
     db_session: AsyncSession = Depends(get_db_session),
     _: httpsig.HTTPSigInfo = Depends(httpsig.httpsig_checker),
@@ -292,7 +363,7 @@ async def index(
     return await templates.render_template(
         db_session,
         request,
-        "index.html",
+        "notes.html",
         {
             "request": request,
             "objects": outbox_objects,

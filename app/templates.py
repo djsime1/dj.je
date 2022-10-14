@@ -84,7 +84,6 @@ def is_current_user_admin(request: Request) -> bool:
 
     return is_admin
 
-
 async def render_template(
     db_session: AsyncSession,
     request: Request,
@@ -97,6 +96,7 @@ async def render_template(
 
     is_admin = False
     is_admin = is_current_user_admin(request)
+    has_dnt = "dnt" in request.headers
 
     return _templates.TemplateResponse(
         template,
@@ -105,6 +105,7 @@ async def render_template(
             "debug": DEBUG,
             "microblogpub_version": VERSION,
             "is_admin": is_admin,
+            "has_dnt": has_dnt,
             "csrf_token": generate_csrf_token(),
             "highlight_css": HIGHLIGHT_CSS,
             "visibility_enum": ap.VisibilityEnum,
