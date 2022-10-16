@@ -2,6 +2,7 @@ import base64
 import os
 import sys
 import time
+import re
 from datetime import timezone
 from io import BytesIO
 from typing import Any
@@ -241,66 +242,6 @@ async def custom_http_exception_handler(
 
 class ActivityPubResponse(JSONResponse):
     media_type = "application/activity+json"
-
-
-# @app.get("/")
-# async def index(
-#     request: Request,
-#     db_session: AsyncSession = Depends(get_db_session),
-#     _: httpsig.HTTPSigInfo = Depends(httpsig.httpsig_checker),
-#     page: int | None = None,
-# ) -> templates.TemplateResponse | ActivityPubResponse:
-#     if is_activitypub_requested(request):
-
-#         return ActivityPubResponse(LOCAL_ACTOR.ap_actor)
-
-#     page = page or 1
-#     where = (
-#         models.OutboxObject.visibility == ap.VisibilityEnum.PUBLIC,
-#         models.OutboxObject.is_deleted.is_(False),
-#         models.OutboxObject.is_hidden_from_homepage.is_(False),
-#         models.OutboxObject.ap_type != "Article",
-#     )
-#     q = select(models.OutboxObject).where(*where)
-#     total_count = await db_session.scalar(
-#         select(func.count(models.OutboxObject.id)).where(*where)
-#     )
-#     page_size = 20
-#     page_offset = (page - 1) * page_size
-
-#     outbox_objects_result = await db_session.scalars(
-#         q.options(
-#             joinedload(models.OutboxObject.outbox_object_attachments).options(
-#                 joinedload(models.OutboxObjectAttachment.upload)
-#             ),
-#             joinedload(models.OutboxObject.relates_to_inbox_object).options(
-#                 joinedload(models.InboxObject.actor),
-#             ),
-#             joinedload(models.OutboxObject.relates_to_outbox_object).options(
-#                 joinedload(models.OutboxObject.outbox_object_attachments).options(
-#                     joinedload(models.OutboxObjectAttachment.upload)
-#                 ),
-#             ),
-#         )
-#         .order_by(models.OutboxObject.is_pinned.desc())
-#         .order_by(models.OutboxObject.ap_published_at.desc())
-#         .offset(page_offset)
-#         .limit(page_size)
-#     )
-#     outbox_objects = outbox_objects_result.unique().all()
-
-#     return await templates.render_template(
-#         db_session,
-#         request,
-#         "index.html",
-#         {
-#             "request": request,
-#             "objects": outbox_objects,
-#             "current_page": page,
-#             "has_next_page": page_offset + len(outbox_objects) < total_count,
-#             "has_previous_page": page > 1,
-#         },
-#     )
 
 @app.get("/")
 async def index(
@@ -907,16 +848,33 @@ def emoji_by_name(name: str) -> ActivityPubResponse:
 
     return ActivityPubResponse({"@context": ap.AS_EXTENDED_CTX, **emoji})
 
-@app.get("/page/{name}")
-async def index(
+@app.get("/pages/")
+async def pages(
     request: Request,
     db_session: AsyncSession = Depends(get_db_session),
 ) -> templates.TemplateResponse:
+    # TODO: Improve efficiency by not reading the file tree every time!
+    plist = {}
+    for entry in os.scandir("app/templates/pages"):
+        if entry.is_file() and entry.name.endswith(".html") and not entry.name.startswith("_") and not entry.name == "index.html":
+            # pages/index.html is actually used for the home page (/)
+            # nicename = entry.name[:-5].capitalize().replace("_", " ")
+            f = open(entry, "+r")
+            description = f.readline().rstrip()
+            f.close()
+            description = re.search(r"^<!-- (.+) -->$", description)
+            if description:
+                description = description.group(1)
+                plist[entry.name[:-5]] = description
+            else:
+                plist[entry.name[:-5]] = None
     return await templates.render_template(
         db_session,
         request,
-        "index.html",
-        {},
+        "pages.html",
+        {
+            "pagelist": plist
+        },
     )
 
 

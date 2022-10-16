@@ -1,0 +1,23 @@
+{%- import "utils.html" as utils with context -%}
+{% extends "layout.html" %}
+
+{% block head %}
+<title>{{ local_actor.display_name }}'s pages</title>
+{% endblock %}
+
+{% block content %}
+<ul class="h-feed" id="pages">
+<data class="p-name" value="{{ local_actor.display_name}}'s pages"></data>
+<h2>Static pages</h2>
+{% for pname, pdesc in pagelist | dictsort %}
+    <li>
+        {% if pdesc %}
+        <span class="muted">- <a href="/pages/{{ pname }}">{{ pname | capitalize | replace("_", " ") }}</a>:</span> {{ pdesc }}
+        {% else %}
+        <span class="muted">- <a href="/pages/{{ pname }}">{{ pname | capitalize | replace("_", " ") }}</a></span>
+        {% endif %}
+    </li>
+{% endfor %}
+</ul>
+
+{% endblock %}
