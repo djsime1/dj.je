@@ -243,6 +243,7 @@ async def custom_http_exception_handler(
 class ActivityPubResponse(JSONResponse):
     media_type = "application/activity+json"
 
+
 @app.get("/")
 async def index(
     request: Request,
@@ -254,6 +255,7 @@ async def index(
         "index.html",
         {},
     )
+
 
 @app.get("/notes")
 async def notes(
@@ -848,6 +850,7 @@ def emoji_by_name(name: str) -> ActivityPubResponse:
 
     return ActivityPubResponse({"@context": ap.AS_EXTENDED_CTX, **emoji})
 
+
 @app.get("/pages/")
 async def pages(
     request: Request,
@@ -856,7 +859,12 @@ async def pages(
     # TODO: Improve efficiency by not reading the file tree every time!
     plist = {}
     for entry in os.scandir("app/templates/pages"):
-        if entry.is_file() and entry.name.endswith(".html") and not entry.name.startswith("_") and not entry.name == "index.html":
+        if (
+            entry.is_file()
+            and entry.name.endswith(".html")
+            and not entry.name.startswith("_")
+            and not entry.name == "index.html"
+        ):
             # pages/index.html is actually used for the home page (/)
             # nicename = entry.name[:-5].capitalize().replace("_", " ")
             f = open(entry, "+r")
@@ -872,9 +880,7 @@ async def pages(
         db_session,
         request,
         "pages.html",
-        {
-            "pagelist": plist
-        },
+        {"pagelist": plist},
     )
 
 

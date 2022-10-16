@@ -85,6 +85,7 @@ def is_current_user_admin(request: Request) -> bool:
 
     return is_admin
 
+
 async def render_template(
     db_session: AsyncSession,
     request: Request,
@@ -138,6 +139,7 @@ async def render_template(
         },
         status_code=status_code,
     )
+
 
 async def render_page(
     db_session: AsyncSession,
