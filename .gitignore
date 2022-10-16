@@ -5,4 +5,9 @@ __pycache__/
 docs/dist/
 requirements.txt
 app/_version.py
-app/static/favicon.ico
+app/static/**
+!app/static/emoji/*
+!app/static/twemoji/*
+!app/static/common-admin.js
+!app/static/new.js
+!app/static/nopic.png
