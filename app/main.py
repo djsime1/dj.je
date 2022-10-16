@@ -907,6 +907,18 @@ def emoji_by_name(name: str) -> ActivityPubResponse:
 
     return ActivityPubResponse({"@context": ap.AS_EXTENDED_CTX, **emoji})
 
+@app.get("/page/{name}")
+async def index(
+    request: Request,
+    db_session: AsyncSession = Depends(get_db_session),
+) -> templates.TemplateResponse:
+    return await templates.render_template(
+        db_session,
+        request,
+        "index.html",
+        {},
+    )
+
 
 @app.post("/inbox")
 async def inbox(

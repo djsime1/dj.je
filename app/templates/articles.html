@@ -12,7 +12,9 @@
 <data class="p-name" value="{{ local_actor.display_name}}'s articles"></data>
 {% for outbox_object in objects %}
     <li>
-        <span class="muted">{{ outbox_object.ap_published_at.strftime("%b %d, %Y") }}</span> <a href="{{ outbox_object.url }}">{{ outbox_object.name }}</a>
+        <h2><a href="{{ outbox_object.url }}">{{ outbox_object.name }}</a></h2>
+        <span class="muted">{{ outbox_object.ap_published_at.strftime("%b %d, %Y") }}. A {{ outbox_object.content | html2text | trim | estimate_reading_time }} minute read.</span>
+        <p>{{ outbox_object.content | html2text | trim | truncate(300) }}</p>
     </li>
 {% endfor %}
 </ul>
