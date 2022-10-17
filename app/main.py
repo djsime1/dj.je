@@ -253,7 +253,7 @@ async def index(
     return await templates.render_template(
         db_session,
         request,
-        "pages/index.html" if os.path.exists("app/pages/index.html") else "index.html",
+        "pages/index.html" if os.path.exists("app/templates/pages/index.html") else "index.html",
         {},
     )
 
@@ -871,7 +871,7 @@ async def pages(
         ):
             # pages/index.html is actually used for the home page (/)
             # nicename = entry.name[:-5].capitalize().replace("_", " ")
-            f = open(entry, "+r")
+            f = open(entry)
             description = f.readline().rstrip()
             f.close()
             description = re.search(r"^<!-- (.+) -->$", description)

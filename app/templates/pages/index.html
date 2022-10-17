@@ -1,3 +1,4 @@
+<!-- Overrides home page -->
 {%- import "utils.html" as utils with context -%}
 {% extends "layout.html" %}
 
@@ -20,7 +21,15 @@
 
 {% block content %}
 
-    <h1>Hello, my name is<br><strong>David.</strong></h1>
-    <h2 align="right">I'm an <strong>amateur developer</strong><br>and <strong>professional nerd</strong>.</h2>
+<h1>Hello, my name is<br><strong>David.</strong></h1>
+<h2 align="right">I'm an <strong>amateur developer</strong><br>and <strong>professional nerd</strong>.</h2>
+<br>
+<p align="justify"> 
+    This is my personal portfolio and microblog. After Twitter added the edit button, I abandoned that account and set up this site on October 17th, 2022.
+    Built atop the awesome <a href="https://docs.microblog.pub">microblog.pub</a> project, the source code to this site can be found <a href="https://github.com/djsime1/dj.je">on my GitHub.</a>
+    Read my ramblings under <a href="/notes">Notes</a>, or stick around for some <a href="/articles">Articles</a> with a little more effort.
+    If you'd like to get in touch, all the necessary details can be found under the <a href="/pages/contact">Contact page.</a>
+</p>
+<img src="/static/skillicons.svg">
 
 {% endblock %}

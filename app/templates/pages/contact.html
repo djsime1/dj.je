@@ -3,24 +3,43 @@
 {% extends "layout.html" %}
 
 {% block head %}
-<title>{{ local_actor.display_name }}'s microblog</title>
-<link rel="indieauth-metadata" href="{{ url_for("well_known_authorization_server") }}">
-<link rel="authorization_endpoint" href="{{ url_for("indieauth_authorization_endpoint") }}">
-<link rel="token_endpoint" href="{{ url_for("indieauth_token_endpoint") }}">
-<link rel="micropub" href="{{ url_for("micropub_endpoint") }}">
-<link rel="alternate" href="{{ local_actor.url }}" title="ActivityPub profile"  type="application/activity+json">
-<meta content="profile" property="og:type" />
-<meta content="{{ local_actor.url }}" property="og:url" />
-<meta content="{{ local_actor.display_name }}'s microblog" property="og:site_name" />
-<meta content="Homepage" property="og:title" />
-<meta content="{{ local_actor.summary | html2text | trim }}" property="og:description" />
-<meta content="{{ local_actor.url }}" property="og:image" />
-<meta content="summary" property="twitter:card" />
-<meta content="{{ local_actor.handle }}" property="profile:username" />
+<title>contact</title>
 {% endblock %}
 
 {% block content %}
-
-    <p>Contact page</p>
+<h1>Contact info</h1>
+<p>Okay, so you want to get in touch with me? Take your pick.</p>
+<h3>Email</h3>
+<p>For inquiries, business or prospect related, please address to: <a href="mailto:contact@dj.je"><pre>contact@dj.je</pre></a></p>
+<p>If you're feeling creative, I encourage you to send your mail to anything @dj.je. <em class="muted">(It all goes to the same inbox)</em></p>
+<h3>Social media</h3>
+<ul id="pages">
+    <li><span class="muted">-</span> <strong>Discord</strong>: <a href="https://discord.gg/SDJDnpyEnc">DJ#9822</a></li>
+    <li><span class="muted">-</span> <strong>GitHub</strong>: <a href="https://github.com/djsime1">djsime1</a></li>
+    <li><span class="muted">-</span> <strong>Telegram</strong>: <a href="https://t.me/djsime1">djsime1</a></li>
+    <li><span class="muted">-</span> <strong>Twitter</strong>: <a href="https://twitter.com/djsime1david">@djsime1david</a> <span class="muted">(Note: Abandoned)</span></li>
+    <li><span class="muted">-</span> <strong>Figma</strong>: <a href="https://figma.com/@djsime1">@djsime1</a></li>
+    <li><span class="muted">-</span> <strong>Reddit</strong>: <a href="https://www.reddit.com/user/djsime1">/u/djsime1</a></li>
+    <li><span class="muted">-</span> <strong>Steam</strong>: <a href="https://steamcommunity.com/id/djsime1/">/id/djsime1</a> <span class="muted">(Note: Unprofessional)</span></li>
+    <li><span class="muted">-</span> <strong>Itch</strong>: <a href="https://djsime1.itch.io/">djsime1</a></li>
+</ul>
+<h3>PGP Key</h3>
+<p>For whatever reason, you can communicate with me securely by encrypting your messages/files to my personal PGP key.</p>
+<dl>
+    <dt>Key ID</dt>
+    <dd><pre>19C8 2BB4 CE3B 6785</pre></dd>
+</dl>
+<dl>
+    <dt>Fingerprint</dt>
+    <dd><pre>DB63 DF1E 806E CB73 933E 4EB5 19C8 2BB4 CE3B 6785</pre></dd>
+</dl>
+<dl>
+    <dt>Keybase</dt>
+    <dd><a href="https://keybase.io/dj1">dj1</a> <em class="muted">(Do NOT message me here!)</em></dd>
+</dl>
+<dl>
+    <dt>Public key</dt>
+    <dd><a href="/static/djsime1_0xCE3B6785_public.asc">Download here.</a> Expiration date is updated every other year.</dd>
+</dl>
 
 {% endblock %}
