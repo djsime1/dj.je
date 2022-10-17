@@ -745,7 +745,7 @@ async def outbox_by_public_id(
             "likes": likes,
             "shares": shares,
             "webmentions": webmentions,
-            "is_private": is_private
+            "is_private": is_private,
         },
     )
 
@@ -887,8 +887,9 @@ async def pages(
         {"pagelist": plist},
     )
 
+
 @app.get("/pages/{path}")
-async def pages(
+async def page(
     path: str,
     request: Request,
     db_session: AsyncSession = Depends(get_db_session),
@@ -901,9 +902,9 @@ async def pages(
     full_path = os.path.realpath(f"{pages_root}/{path}")
 
     if os.path.commonpath((full_path, pages_root)) != pages_root:
-        raise HTTPException(status_code=400) # Directory traversal
+        raise HTTPException(status_code=400)  # Directory traversal
 
-    if os.path.exists(f"{pages_root}/_{path}.html"): # Underscore prefixed file
+    if os.path.exists(f"{pages_root}/_{path}.html"):  # Underscore prefixed file
         is_private = True
     elif os.path.exists(f"{pages_root}/{path}.html"):
         is_private = False
@@ -914,9 +915,7 @@ async def pages(
         db_session,
         request,
         f"/pages/{'_' if is_private else ''}{path}.html",
-        {
-            "is_private": is_private
-        },
+        {"is_private": is_private},
     )
 
 
