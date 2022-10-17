@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+{% if is_private %}
+<meta name="robots" content="noindex">
+{% endif %}
 <link rel="stylesheet" href="/static/css/main.css?v={{ CSS_HASH }}">
 <link rel="alternate" title="{{ local_actor.display_name}}'s microblog" type="application/json" href="{{ url_for("json_feed") }}" />
 <link rel="alternate" href="{{ url_for("rss_feed") }}" type="application/rss+xml" title="{{ local_actor.display_name}}'s microblog">
@@ -63,7 +66,7 @@
 {% if is_admin %}
 <script src="/static/common-admin.js?v={{ JS_HASH }}"></script>
 {% endif %}
-{% if not has_dnt %}
+{% if not (has_dnt or is_admin or is_private) %}
 <script async defer src="https://sa.dj.je/latest.js"></script>
 <noscript><img src="https://sa.dj.je/noscript.gif" alt="" referrerpolicy="no-referrer-when-downgrade" /></noscript>
 {% endif %}

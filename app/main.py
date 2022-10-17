@@ -223,6 +223,7 @@ async def custom_http_exception_handler(
         async with async_session() as db_session:
             title = (
                 {
+                    400: "oops, you cant do that.",
                     404: "oops, nothing to see here.",
                     500: "oops, something went wrong.",
                 }
@@ -732,6 +733,8 @@ async def outbox_by_public_id(
         )
     ).all()
 
+    is_private = maybe_object.visibility != ap.VisibilityEnum.PUBLIC
+
     return await templates.render_template(
         db_session,
         request,
@@ -742,6 +745,7 @@ async def outbox_by_public_id(
             "likes": likes,
             "shares": shares,
             "webmentions": webmentions,
+            "is_private": is_private
         },
     )
 
@@ -881,6 +885,38 @@ async def pages(
         request,
         "pages.html",
         {"pagelist": plist},
+    )
+
+@app.get("/pages/{path}")
+async def pages(
+    path: str,
+    request: Request,
+    db_session: AsyncSession = Depends(get_db_session),
+) -> templates.TemplateResponse:
+    is_private = False
+    path = path.lower().strip("/_")
+    # pages_root = "app/templates/pages/"
+    # full_path = os.path.realpath(pages_root + path)
+    pages_root = os.path.realpath("app/templates/pages/")
+    full_path = os.path.realpath(f"{pages_root}/{path}")
+
+    if os.path.commonpath((full_path, pages_root)) != pages_root:
+        raise HTTPException(status_code=400) # Directory traversal
+
+    if os.path.exists(f"{pages_root}/_{path}.html"): # Underscore prefixed file
+        is_private = True
+    elif os.path.exists(f"{pages_root}/{path}.html"):
+        is_private = False
+    else:
+        raise HTTPException(status_code=404)
+
+    return await templates.render_template(
+        db_session,
+        request,
+        f"/pages/{'_' if is_private else ''}{path}.html",
+        {
+            "is_private": is_private
+        },
     )
 
 

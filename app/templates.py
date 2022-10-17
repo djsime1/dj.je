@@ -141,61 +141,6 @@ async def render_template(
     )
 
 
-async def render_page(
-    db_session: AsyncSession,
-    request: Request,
-    template: str,
-    template_args: dict[str, Any] | None = None,
-    status_code: int = 200,
-) -> TemplateResponse:
-    if template_args is None:
-        template_args = {}
-
-    is_admin = False
-    is_admin = is_current_user_admin(request)
-    has_dnt = "dnt" in request.headers
-
-    return _templates.TemplateResponse(
-        template,
-        {
-            "request": request,
-            "debug": DEBUG,
-            "microblogpub_version": VERSION,
-            "is_admin": is_admin,
-            "has_dnt": has_dnt,
-            "csrf_token": generate_csrf_token(),
-            "highlight_css": HIGHLIGHT_CSS,
-            "visibility_enum": ap.VisibilityEnum,
-            "notifications_count": await db_session.scalar(
-                select(func.count(models.Notification.id)).where(
-                    models.Notification.is_new.is_(True)
-                )
-            )
-            if is_admin
-            else 0,
-            "articles_count": await db_session.scalar(
-                select(func.count(models.OutboxObject.id)).where(
-                    models.OutboxObject.visibility == ap.VisibilityEnum.PUBLIC,
-                    models.OutboxObject.is_deleted.is_(False),
-                    models.OutboxObject.is_hidden_from_homepage.is_(False),
-                    models.OutboxObject.ap_type == "Article",
-                )
-            ),
-            "local_actor": LOCAL_ACTOR,
-            "followers_count": await db_session.scalar(
-                select(func.count(models.Follower.id))
-            ),
-            "following_count": await db_session.scalar(
-                select(func.count(models.Following.id))
-            ),
-            "actor_types": ap.ACTOR_TYPES,
-            "custom_footer": CUSTOM_FOOTER,
-            **template_args,
-        },
-        status_code=status_code,
-    )
-
-
 # HTML/templates helper
 ALLOWED_TAGS = [
     "a",
