@@ -99,6 +99,8 @@ class Config(pydantic.BaseModel):
     code_highlighting_theme = "friendly_grayscale"
     blocked_servers: list[_BlockedServer] = []
     custom_footer: str | None = None
+    analytics_code: str | None = None
+    header_links: dict | None = None
     emoji: str | None = None
     also_known_as: str | None = None
 
@@ -185,6 +187,13 @@ CODE_HIGHLIGHTING_THEME = CONFIG.code_highlighting_theme
 
 MOVED_TO = _get_moved_to()
 
+ANALYTICS_CODE = CONFIG.analytics_code
+HEADER_LINKS = CONFIG.header_links if CONFIG.header_links else {
+    "Home": "@index",
+    "Notes": "@notes",
+    "Articles": "@articles",
+    "Pages": "@pages"
+}
 
 session_serializer = URLSafeTimedSerializer(
     CONFIG.secret,

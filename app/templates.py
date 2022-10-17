@@ -27,6 +27,8 @@ from app.ap_object import Attachment
 from app.ap_object import Object
 from app.config import BASE_URL
 from app.config import CUSTOM_FOOTER
+from app.config import ANALYTICS_CODE
+from app.config import HEADER_LINKS
 from app.config import DEBUG
 from app.config import VERSION
 from app.config import generate_csrf_token
@@ -135,6 +137,8 @@ async def render_template(
             ),
             "actor_types": ap.ACTOR_TYPES,
             "custom_footer": CUSTOM_FOOTER,
+            "analytics_code": ANALYTICS_CODE,
+            "header_links": HEADER_LINKS,
             **template_args,
         },
         status_code=status_code,

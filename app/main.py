@@ -253,7 +253,7 @@ async def index(
     return await templates.render_template(
         db_session,
         request,
-        "index.html",
+        "pages/index.html" if os.path.exists("app/pages/index.html") else "index.html",
         {},
     )
 

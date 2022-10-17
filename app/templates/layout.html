@@ -26,12 +26,13 @@
     {% endmacro %}
     <nav class="flexbox">
         <ul>
-            <li>{{ reverse_url("index", "Home") }}</li>
-            <li>{{ reverse_url("notes", "Notes") }}</li>
-            <li>{{ reverse_url("articles", "Articles") }}</li>
-            <li>{{ static_url("/pages/contact", "Contact") }}</li>
-            <li>{{ static_url("/pages/pgp", "PGP") }}</li>
-            <li>{{ reverse_url("pages", "Pages") }}</li>
+            {% for lname, ltarget in header_links.items() %}
+            {% if ltarget[0] == "@" %}
+            <li>{{ reverse_url(ltarget[1:], lname) }}</li>
+            {% else %}
+            <li>{{ static_url(ltarget, lname) }}</li>
+            {% endif %}
+            {% endfor %}
         </ul>
         {% if is_admin %}
         <hr>
@@ -66,9 +67,8 @@
 {% if is_admin %}
 <script src="/static/common-admin.js?v={{ JS_HASH }}"></script>
 {% endif %}
-{% if not (has_dnt or is_admin or is_private) %}
-<script async defer src="https://sa.dj.je/latest.js"></script>
-<noscript><img src="https://sa.dj.je/noscript.gif" alt="" referrerpolicy="no-referrer-when-downgrade" /></noscript>
+{% if analytics_code and not (has_dnt or is_admin or is_private) %}
+    {{ analytics_code | safe }}
 {% endif %}
 </body>
 </html>
