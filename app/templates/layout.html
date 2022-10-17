@@ -14,28 +14,32 @@
 </head>
 <body>
 <div id="navbar">
-    {% macro admin_link(url, text) %}
+    {% macro reverse_url(url, text) %}
     {% set url_for = request.app.router.url_path_for(url) %}
     <a href="{{ url_for }}" {% if request.url.path == url_for %}class="active"{% endif %}>{{ text }}</a>
     {% endmacro %}
+    {% macro static_url(url, text) %}
+    <a href="{{ url }}" {% if request.url.path == url %}class="active"{% endif %}>{{ text }}</a>
+    {% endmacro %}
     <nav class="flexbox">
         <ul>
-            <li>{{ admin_link("index", "Home") }}</li>
-            <li>{{ admin_link("notes", "Notes") }}</li>
-            <li>{{ admin_link("articles", "Articles") }}</li>
-            <!-- Contact -->
-            <!-- PGP -->
+            <li>{{ reverse_url("index", "Home") }}</li>
+            <li>{{ reverse_url("notes", "Notes") }}</li>
+            <li>{{ reverse_url("articles", "Articles") }}</li>
+            <li>{{ static_url("/pages/contact", "Contact") }}</li>
+            <li>{{ static_url("/pages/pgp", "PGP") }}</li>
+            <li>{{ reverse_url("pages", "Pages") }}</li>
         </ul>
         {% if is_admin %}
         <hr>
         <ul>
-            <li>{{ admin_link("admin_new", "New") }}</li>
-            <li>{{ admin_link("admin_stream", "Stream") }}</li>
-            <li>{{ admin_link("admin_inbox", "Inbox") }} / {{ admin_link("admin_outbox", "Outbox") }}</li>
-            <li>{{ admin_link("admin_direct_messages", "DMs") }}</li>
-            <li>{{ admin_link("get_notifications", "Notifications") }} {% if notifications_count %}({{ notifications_count }}){% endif %}</li>
-            <li>{{ admin_link("get_lookup", "Lookup") }}</li>
-            <li>{{ admin_link("admin_bookmarks", "Bookmarks") }}</li>
+            <li>{{ reverse_url("admin_new", "New") }}</li>
+            <li>{{ reverse_url("admin_stream", "Stream") }}</li>
+            <li>{{ reverse_url("admin_inbox", "Inbox") }} / {{ reverse_url("admin_outbox", "Outbox") }}</li>
+            <li>{{ reverse_url("admin_direct_messages", "DMs") }}</li>
+            <li>{{ reverse_url("get_notifications", "Notifications") }} {% if notifications_count %}({{ notifications_count }}){% endif %}</li>
+            <li>{{ reverse_url("get_lookup", "Lookup") }}</li>
+            <li>{{ reverse_url("admin_bookmarks", "Bookmarks") }}</li>
             <li><a href="{{ url_for("logout")}}">Logout</a></li>
         </ul>
         {% endif %}
