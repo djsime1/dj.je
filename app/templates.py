@@ -27,6 +27,8 @@ from app.ap_object import Attachment
 from app.ap_object import Object
 from app.config import BASE_URL
 from app.config import CUSTOM_FOOTER
+from app.config import ANALYTICS_CODE
+from app.config import HEADER_LINKS
 from app.config import DEBUG
 from app.config import VERSION
 from app.config import generate_csrf_token
@@ -34,6 +36,7 @@ from app.config import session_serializer
 from app.database import AsyncSession
 from app.media import proxied_media_url
 from app.utils import privacy_replace
+from app.utils import article_tools
 from app.utils.datetime import now
 from app.utils.highlight import HIGHLIGHT_CSS
 from app.utils.highlight import highlight
@@ -97,6 +100,7 @@ async def render_template(
 
     is_admin = False
     is_admin = is_current_user_admin(request)
+    has_dnt = "dnt" in request.headers
 
     return _templates.TemplateResponse(
         template,
@@ -105,6 +109,7 @@ async def render_template(
             "debug": DEBUG,
             "microblogpub_version": VERSION,
             "is_admin": is_admin,
+            "has_dnt": has_dnt,
             "csrf_token": generate_csrf_token(),
             "highlight_css": HIGHLIGHT_CSS,
             "visibility_enum": ap.VisibilityEnum,
@@ -132,6 +137,8 @@ async def render_template(
             ),
             "actor_types": ap.ACTOR_TYPES,
             "custom_footer": CUSTOM_FOOTER,
+            "analytics_code": ANALYTICS_CODE,
+            "header_links": HEADER_LINKS,
             **template_args,
         },
         status_code=status_code,
@@ -416,6 +423,8 @@ _templates.env.filters["pluralize"] = _pluralize
 _templates.env.filters["parse_datetime"] = _parse_datetime
 _templates.env.filters["poll_item_pct"] = _poll_item_pct
 _templates.env.filters["privacy_replace_url"] = privacy_replace.replace_url
+_templates.env.filters["estimate_reading_time"] = article_tools.estimate_reading_time
+_templates.env.filters["truncate_article"] = article_tools.truncate_article
 _templates.env.globals["JS_HASH"] = config.JS_HASH
 _templates.env.globals["CSS_HASH"] = config.CSS_HASH
 _templates.env.globals["BASE_URL"] = config.BASE_URL

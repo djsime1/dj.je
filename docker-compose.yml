@@ -9,5 +9,6 @@ services:
     volumes:
       - ./data:/app/data
       - ./app/static:/app/app/static
+      - ./app/templates/pages:/app/app/templates/pages
     ports:
       - "8000:8000"

@@ -2,6 +2,7 @@ import base64
 import os
 import sys
 import time
+import re
 from datetime import timezone
 from io import BytesIO
 from typing import Any
@@ -222,8 +223,9 @@ async def custom_http_exception_handler(
         async with async_session() as db_session:
             title = (
                 {
-                    404: "Oops, nothing to see here",
-                    500: "Oops, something went wrong",
+                    400: "oops, you cant do that.",
+                    404: "oops, nothing to see here.",
+                    500: "oops, something went wrong.",
                 }
             ).get(exc.status_code, exc.detail)
             try:
@@ -245,6 +247,19 @@ class ActivityPubResponse(JSONResponse):
 
 @app.get("/")
 async def index(
+    request: Request,
+    db_session: AsyncSession = Depends(get_db_session),
+) -> templates.TemplateResponse:
+    return await templates.render_template(
+        db_session,
+        request,
+        "pages/index.html" if os.path.exists("app/templates/pages/index.html") else "index.html",
+        {},
+    )
+
+
+@app.get("/notes")
+async def notes(
     request: Request,
     db_session: AsyncSession = Depends(get_db_session),
     _: httpsig.HTTPSigInfo = Depends(httpsig.httpsig_checker),
@@ -292,7 +307,7 @@ async def index(
     return await templates.render_template(
         db_session,
         request,
-        "index.html",
+        "notes.html",
         {
             "request": request,
             "objects": outbox_objects,
@@ -718,6 +733,8 @@ async def outbox_by_public_id(
         )
     ).all()
 
+    is_private = maybe_object.visibility != ap.VisibilityEnum.PUBLIC
+
     return await templates.render_template(
         db_session,
         request,
@@ -728,6 +745,7 @@ async def outbox_by_public_id(
             "likes": likes,
             "shares": shares,
             "webmentions": webmentions,
+            "is_private": is_private,
         },
     )
 
@@ -835,6 +853,70 @@ def emoji_by_name(name: str) -> ActivityPubResponse:
         raise HTTPException(status_code=404)
 
     return ActivityPubResponse({"@context": ap.AS_EXTENDED_CTX, **emoji})
+
+
+@app.get("/pages/")
+async def pages(
+    request: Request,
+    db_session: AsyncSession = Depends(get_db_session),
+) -> templates.TemplateResponse:
+    # TODO: Improve efficiency by not reading the file tree every time!
+    plist = {}
+    for entry in os.scandir("app/templates/pages"):
+        if (
+            entry.is_file()
+            and entry.name.endswith(".html")
+            and not entry.name.startswith("_")
+            and not entry.name == "index.html"
+        ):
+            # pages/index.html is actually used for the home page (/)
+            # nicename = entry.name[:-5].capitalize().replace("_", " ")
+            f = open(entry)
+            description = f.readline().rstrip()
+            f.close()
+            description = re.search(r"^<!-- (.+) -->$", description)
+            if description:
+                description = description.group(1)
+                plist[entry.name[:-5]] = description
+            else:
+                plist[entry.name[:-5]] = None
+    return await templates.render_template(
+        db_session,
+        request,
+        "pages.html",
+        {"pagelist": plist},
+    )
+
+
+@app.get("/pages/{path}")
+async def page(
+    path: str,
+    request: Request,
+    db_session: AsyncSession = Depends(get_db_session),
+) -> templates.TemplateResponse:
+    is_private = False
+    path = path.lower().strip("/_")
+    # pages_root = "app/templates/pages/"
+    # full_path = os.path.realpath(pages_root + path)
+    pages_root = os.path.realpath("app/templates/pages/")
+    full_path = os.path.realpath(f"{pages_root}/{path}")
+
+    if os.path.commonpath((full_path, pages_root)) != pages_root:
+        raise HTTPException(status_code=400)  # Directory traversal
+
+    if os.path.exists(f"{pages_root}/_{path}.html"):  # Underscore prefixed file
+        is_private = True
+    elif os.path.exists(f"{pages_root}/{path}.html"):
+        is_private = False
+    else:
+        raise HTTPException(status_code=404)
+
+    return await templates.render_template(
+        db_session,
+        request,
+        f"/pages/{'_' if is_private else ''}{path}.html",
+        {"is_private": is_private},
+    )
 
 
 @app.post("/inbox")
