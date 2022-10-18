@@ -2,6 +2,9 @@ import hashlib
 import os
 import secrets
 from pathlib import Path
+import hmac
+import time
+import struct
 
 import bcrypt
 import itsdangerous
@@ -141,6 +144,19 @@ def is_activitypub_requested(req: Request) -> bool:
 
 def verify_password(pwd: str) -> bool:
     return bcrypt.checkpw(pwd.encode(), CONFIG.admin_password)
+
+
+def verify_totp(totp: str) -> bool:
+    key = CONFIG.secret.encode()
+    counter = int(time.time() // 30)
+    for desync in range(-1, 2):
+        mac = hmac.new(key, struct.pack('>Q', counter + desync), 'sha1').digest()
+        offset = mac[-1] & 0x0f
+        binary = struct.unpack('>L', mac[offset:offset+4])[0] & 0x7fffffff
+        if str(binary)[-6:].zfill(6) == totp:
+            return True
+    return False
+        
 
 
 CONFIG = load_config()

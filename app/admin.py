@@ -31,6 +31,7 @@ from app.config import generate_csrf_token
 from app.config import session_serializer
 from app.config import verify_csrf_token
 from app.config import verify_password
+from app.config import verify_totp
 from app.database import AsyncSession
 from app.database import get_db_session
 from app.lookup import lookup
@@ -1144,18 +1145,19 @@ async def login(
 async def login_validation(
     request: Request,
     password: str = Form(),
+    totp: str = Form(),
     redirect: str | None = Form(None),
     csrf_check: None = Depends(verify_csrf_token),
     db_session: AsyncSession = Depends(get_db_session),
 ) -> RedirectResponse | templates.TemplateResponse:
-    if not verify_password(password):
+    if not (verify_password(password) and verify_totp(totp)):
         logger.warning("Invalid password")
         return await templates.render_template(
             db_session,
             request,
             "login.html",
             {
-                "error": "Invalid password",
+                "error": "nope.",
                 "csrf_token": generate_csrf_token(),
                 "redirect": request.query_params.get("redirect", ""),
             },
