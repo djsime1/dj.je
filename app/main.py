@@ -136,7 +136,7 @@ class CustomMiddleware:
                 headers["x-frame-options"] = "DENY"
                 headers["permissions-policy"] = "interest-cohort=()"
                 headers["content-security-policy"] = (
-                    f"default-src 'self'; "
+                    f"default-src 'self' '{config._SCHEME}://*.{config.DOMAIN}'; "
                     f"style-src 'self' 'sha256-{HIGHLIGHT_CSS_HASH}'; "
                     f"frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
                 )

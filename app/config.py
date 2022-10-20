@@ -10,6 +10,7 @@ import bcrypt
 import itsdangerous
 import pydantic
 import tomli
+import tomli_w
 from fastapi import Form
 from fastapi import HTTPException
 from fastapi import Request
@@ -126,6 +127,15 @@ def load_config() -> Config:
         raise ValueError(
             f"Please run the configuration wizard, {_CONFIG_FILE} is missing"
         )
+
+def save_config(conf: Config, conf_file: str = (ROOT_DIR / "data" / _CONFIG_FILE)) -> bool:
+    try:
+        cf = open(conf_file, "wb")
+        tomli_w.dump(conf, cf)
+        cf.close()
+        return True
+    except: # TODO: Handle read only and file not found
+        return False
 
 
 def is_activitypub_requested(req: Request) -> bool:
