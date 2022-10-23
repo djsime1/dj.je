@@ -136,7 +136,7 @@ class CustomMiddleware:
                 headers["x-frame-options"] = "DENY"
                 headers["permissions-policy"] = "interest-cohort=()"
                 headers["content-security-policy"] = (
-                    f"default-src 'self' '{config._SCHEME}://*.{config.DOMAIN}'; "
+                    f"default-src 'self' {config._SCHEME}://*.{config.DOMAIN}; "
                     f"style-src 'self' 'sha256-{HIGHLIGHT_CSS_HASH}'; "
                     f"frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
                 )
@@ -249,11 +249,17 @@ class ActivityPubResponse(JSONResponse):
 async def index(
     request: Request,
     db_session: AsyncSession = Depends(get_db_session),
-) -> templates.TemplateResponse:
+) -> templates.TemplateResponse | ActivityPubResponse:
+    if is_activitypub_requested(request):
+
+        return ActivityPubResponse(LOCAL_ACTOR.ap_actor)
+
     return await templates.render_template(
         db_session,
         request,
-        "pages/index.html" if os.path.exists("app/templates/pages/index.html") else "index.html",
+        "pages/index.html"
+        if os.path.exists("app/templates/pages/index.html")
+        else "index.html",
         {},
     )
 

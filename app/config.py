@@ -128,13 +128,16 @@ def load_config() -> Config:
             f"Please run the configuration wizard, {_CONFIG_FILE} is missing"
         )
 
-def save_config(conf: Config, conf_file: str = (ROOT_DIR / "data" / _CONFIG_FILE)) -> bool:
+
+def save_config(
+    conf: Config, conf_file: str = (ROOT_DIR / "data" / _CONFIG_FILE)
+) -> bool:
     try:
         cf = open(conf_file, "wb")
         tomli_w.dump(conf, cf)
         cf.close()
         return True
-    except: # TODO: Handle read only and file not found
+    except:  # TODO: Handle read only and file not found
         return False
 
 
@@ -160,13 +163,12 @@ def verify_totp(totp: str) -> bool:
     key = CONFIG.secret.encode()
     counter = int(time.time() // 30)
     for desync in range(-1, 2):
-        mac = hmac.new(key, struct.pack('>Q', counter + desync), 'sha1').digest()
-        offset = mac[-1] & 0x0f
-        binary = struct.unpack('>L', mac[offset:offset+4])[0] & 0x7fffffff
+        mac = hmac.new(key, struct.pack(">Q", counter + desync), "sha1").digest()
+        offset = mac[-1] & 0x0F
+        binary = struct.unpack(">L", mac[offset : offset + 4])[0] & 0x7FFFFFFF
         if str(binary)[-6:].zfill(6) == totp:
             return True
     return False
-        
 
 
 CONFIG = load_config()
@@ -212,12 +214,16 @@ CODE_HIGHLIGHTING_THEME = CONFIG.code_highlighting_theme
 MOVED_TO = _get_moved_to()
 
 ANALYTICS_CODE = CONFIG.analytics_code
-HEADER_LINKS = CONFIG.header_links if CONFIG.header_links else {
-    "Home": "@index",
-    "Notes": "@notes",
-    "Articles": "@articles",
-    "Pages": "@pages"
-}
+HEADER_LINKS = (
+    CONFIG.header_links
+    if CONFIG.header_links
+    else {
+        "Home": "@index",
+        "Notes": "@notes",
+        "Articles": "@articles",
+        "Pages": "@pages",
+    }
+)
 
 session_serializer = URLSafeTimedSerializer(
     CONFIG.secret,
