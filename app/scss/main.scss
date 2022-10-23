@@ -1,5 +1,5 @@
-$font-stack: "Supreme-variable", "Segoe UI", Helvetica, sans-serif;
-$font-stack-alt: "Technor-variable", "Times New Roman", Times, serif;
+$font-stack: sans-serif;
+$font-stack-alt: serif;
 $background: #171717;
 $light-background: #383838;
 $text-color: #FFF;
@@ -7,15 +7,12 @@ $primary-color: #7D56F3;
 $secondary-color: #F25D93;
 $form-background-color: #333;
 $form-text-color: #CCC;
-$muted-color: #999; // solarized comment text
+$muted-color: #999;
 $primary-button-text-color: #fff;
 $code-highlight-background: #f0f0f0;
 
-@import url("supreme.css");
-@import url("technor.css");
-
 // Load custom theme
-// @import "theme.scss";
+@import "theme.scss";
 
 .primary-color {
     color: $primary-color;

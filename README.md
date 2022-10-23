@@ -1,16 +1,18 @@
-# microblog.pub
+# microblog.pub (and then some)
 
-A self-hosted, single-user, ActivityPub powered microblog.
+Forked and modified to fit my personal needs.  
+As such, strong documentation for my modifications doesn't exist besides [`CHANGES.md`](https://github.com/djsime1/dj.je/blob/main/CHANGES.md).  
+Official upstream docs can be found at [docs.microblog.pub](https://docs.microblog.pub).
 
 [![builds.sr.ht status](https://builds.sr.ht/~tsileo/microblog.pub.svg)](https://builds.sr.ht/~tsileo/microblog.pub?)
 [![AGPL 3.0](https://img.shields.io/badge/license-AGPL_3.0-blue.svg?style=flat)](https://git.sr.ht/~tsileo/microblog.pub/tree/v2/item/LICENSE)
 
 Instances in the wild:
 
- - [microblog.pub](https://microblog.pub/) (follow to get updated about the project)
- - [hexa.ninja](https://hexa.ninja) (theme customization example)
- - [testing.microblog.pub](https://testing.microblog.pub/)
+ - [dj.je](https://dj.je)
 
+**If you are running this fork, feel free to PR your site into this list!**  
+Check the [upstream README](https://git.sr.ht/~tsileo/microblog.pub/tree/v2/item/README.md) for a list of instances running the upstream version.  
 There are still some rough edges, but the server is mostly functional.
 
 ## Features
@@ -42,17 +44,20 @@ There are still some rough edges, but the server is mostly functional.
 
 ## Getting started
 
-Check out the [online documentation](https://docs.microblog.pub).   
+First familiarize yourself with the [`CHANGES.md` list](https://github.com/djsime1/dj.je/blob/main/CHANGES.md), then check out the [upstream documentation](https://docs.microblog.pub).  
 
 ## Credits
 
+ - [Thomas Sileo (tsileo)](https://hexa.ninja/)
  - Emoji from [Twemoji](https://twemoji.twitter.com/)
  - Awesome custom goose emoji from [@pamela@bsd.network](https://bsd.network/@pamela)
 
 
 ## Contributing
 
-All the development takes place on [sourcehut](https://sr.ht/~tsileo/microblog.pub/), GitHub is only used as a mirror:
+This fork's development takes place on [GitHub](https://github.com/djsime1/dj.je). Since upstream changes are frequently pulled in, you should probably contribute there instead of here!
+
+Upstream development takes place on [sourcehut](https://sr.ht/~tsileo/microblog.pub/)
 
  - [Project](https://sr.ht/~tsileo/microblog.pub/)
  - [Issue tracker](https://todo.sr.ht/~tsileo/microblog.pub)
