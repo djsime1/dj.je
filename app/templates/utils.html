@@ -396,7 +396,8 @@
     {% endif %}
 
     {% if is_article_mode %}
-                <time class="dt-published muted" datetime="{{ object.ap_published_at.replace(microsecond=0).isoformat() }}" title="{{ object.ap_published_at.replace(microsecond=0).isoformat() }}">{{ object.ap_published_at.strftime("%b %d, %Y") }}</time>
+                <time class="dt-published muted" datetime="{{ object.ap_published_at.replace(microsecond=0).isoformat() }}" title="{{ object.ap_published_at.replace(microsecond=0).isoformat() }}">Published {{ object.ap_published_at.strftime("%b %d, %Y") }},</time>
+                <span class="muted">estimated {{ object.content | html2text | trim | estimate_reading_time }} minute read.</span>
     {% endif %}
 
     {% if object.summary %}

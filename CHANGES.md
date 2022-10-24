@@ -23,7 +23,7 @@
 
 - **Error pages have been modified slightly.**
 
-- **Default Content Security Policy (CSP) has been expanded to include wildcard subdomains.**
+- **Default Content Security Policy (CSP) has been expanded to include wildcard subdomains and inline styles.**
 
 - **A few theme/style adjustments, mainly colors and fonts.**
 
