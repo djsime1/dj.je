@@ -842,7 +842,7 @@ async def tag_by_name(
     return await templates.render_template(
         db_session,
         request,
-        "index.html",
+        "notes.html",
         {
             "request": request,
             "objects": outbox_objects,

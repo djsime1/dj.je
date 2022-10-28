@@ -34,3 +34,9 @@
 - **2FA (TOTP) was added to admin login.**
 - - Currently can't be disabled (without reverting the code yourself), this will change eventually.
 - - TOTP secret is the `secret` of `profile.toml` (Note that you will have to base32-encode it AS UTF-8 and manually import that to your 2FA app of choice.)
+
+- **Added the ability to edit your own posts.**
+- - Currently only the main content can be changed.
+- - Should be possible to update other properties in the future.
+
+- **Unsaved changes popup while authoring posts.**

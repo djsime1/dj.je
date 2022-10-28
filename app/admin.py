@@ -153,39 +153,53 @@ async def admin_new(
     request: Request,
     query: str | None = None,
     in_reply_to: str | None = None,
+    editing: str | None = None,
     with_content: str | None = None,
     with_visibility: str | None = None,
     db_session: AsyncSession = Depends(get_db_session),
 ) -> templates.TemplateResponse:
     content = ""
     content_warning = None
-    in_reply_to_object = None
-    if in_reply_to:
-        in_reply_to_object = await boxes.get_anybox_object_by_ap_id(
-            db_session, in_reply_to
+    content_title = None
+    object_of_interest = None
+    if in_reply_to and editing:
+        raise HTTPException(status_code=422, detail="Error: Can not reply and edit at the same time")
+    if in_reply_to or editing:
+        target_id = editing if editing else in_reply_to
+        object_of_interest = await boxes.get_anybox_object_by_ap_id(
+            db_session, target_id
         )
-        if not in_reply_to_object:
-            logger.info(f"Saving unknwown object {in_reply_to}")
-            raw_object = await ap.fetch(in_reply_to)
+        if not object_of_interest:
+            logger.info(f"Saving unknwown object {target_id}")
+            raw_object = await ap.fetch(target_id)
             await boxes.save_object_to_inbox(db_session, raw_object)
             await db_session.commit()
-            in_reply_to_object = await boxes.get_anybox_object_by_ap_id(
-                db_session, in_reply_to
+            object_of_interest = await boxes.get_anybox_object_by_ap_id(
+                db_session, target_id
             )
-
-        # Add mentions to the initial note content
-        if not in_reply_to_object:
+        if not object_of_interest:
             raise ValueError(f"Unknown object {in_reply_to=}")
-        if in_reply_to_object.actor.ap_id != LOCAL_ACTOR.ap_id:
-            content += f"{in_reply_to_object.actor.handle} "
-        for tag in in_reply_to_object.tags:
+        if object_of_interest.summary:
+            content_warning = object_of_interest.summary
+    if in_reply_to:
+        # Add mentions to the initial note content
+        if not object_of_interest:
+            raise ValueError(f"Unknown object {in_reply_to=}")
+        if object_of_interest.actor.ap_id != LOCAL_ACTOR.ap_id:
+            content += f"{object_of_interest.actor.handle} "
+        for tag in object_of_interest.tags:
             if tag.get("type") == "Mention" and tag["name"] != LOCAL_ACTOR.handle:
                 mentioned_actor = await fetch_actor(db_session, tag["href"])
                 content += f"{mentioned_actor.handle} "
-
-        # Copy the content warning if any
-        if in_reply_to_object.summary:
-            content_warning = in_reply_to_object.summary
+    elif editing:
+        if object_of_interest.actor.ap_id != LOCAL_ACTOR.ap_id:
+            raise HTTPException(status_code=422, detail="Error: You can only edit your own posts")
+        if object_of_interest.source:
+            content = object_of_interest.source
+        else:
+            content = object_of_interest.content
+        if object_of_interest.ap_type == "Article":
+            content_title = object_of_interest.name
     elif with_content:
         content += f"{with_content} "
 
@@ -194,9 +208,10 @@ async def admin_new(
         request,
         "admin_new.html",
         {
-            "in_reply_to_object": in_reply_to_object,
+            "in_reply_to_object": object_of_interest if in_reply_to else None,
             "content": content,
             "content_warning": content_warning,
+            "content_title": content_title,
             "visibility_choices": [
                 (v.name, ap.VisibilityEnum.get_display_name(v))
                 for v in ap.VisibilityEnum
@@ -1036,6 +1051,7 @@ async def admin_actions_new(
     content: str | None = Form(None),
     redirect_url: str = Form(),
     in_reply_to: str | None = Form(None),
+    editing: str | None = Form(None),
     content_warning: str | None = Form(None),
     is_sensitive: bool = Form(False),
     visibility: str = Form(),
@@ -1044,6 +1060,8 @@ async def admin_actions_new(
     csrf_check: None = Depends(verify_csrf_token),
     db_session: AsyncSession = Depends(get_db_session),
 ) -> RedirectResponse:
+    if in_reply_to and editing:
+        raise HTTPException(status_code=422, detail="Error: Can not reply and edit at the same time")
     if not content and not content_warning:
         raise HTTPException(status_code=422, detail="Error: object must have a content")
 
@@ -1055,52 +1073,63 @@ async def admin_actions_new(
         content_warning = None
 
     if not content:
-        raise HTTPException(status_code=422, detail="Error: objec must have a content")
+        raise HTTPException(status_code=422, detail="Error: object must have a content")
 
-    # XXX: for some reason, no files restuls in an empty single file
-    uploads = []
-    raw_form_data = await request.form()
-    if len(files) >= 1 and files[0].filename:
-        for f in files:
-            upload = await save_upload(db_session, f)
-            uploads.append((upload, f.filename, raw_form_data.get("alt_" + f.filename)))
+    if editing:
+        public_id = await boxes.send_update(
+            db_session,
+            ap_id = editing,
+            source = content,
+        )
+        return RedirectResponse(
+            request.url_for("outbox_by_public_id", public_id=public_id),
+            status_code=302,
+        )
+    else:
+        # XXX: for some reason, no files restuls in an empty single file
+        uploads = []
+        raw_form_data = await request.form()
+        if len(files) >= 1 and files[0].filename:
+            for f in files:
+                upload = await save_upload(db_session, f)
+                uploads.append((upload, f.filename, raw_form_data.get("alt_" + f.filename)))
 
-    ap_type = "Note"
+        ap_type = "Note"
 
-    poll_duration_in_minutes = None
-    poll_answers = None
-    if poll_type:
-        ap_type = "Question"
-        poll_answers = []
-        for i in ["1", "2", "3", "4"]:
-            if answer := raw_form_data.get(f"poll_answer_{i}"):
-                poll_answers.append(answer)
+        poll_duration_in_minutes = None
+        poll_answers = None
+        if poll_type:
+            ap_type = "Question"
+            poll_answers = []
+            for i in ["1", "2", "3", "4"]:
+                if answer := raw_form_data.get(f"poll_answer_{i}"):
+                    poll_answers.append(answer)
 
-        if not poll_answers or len(poll_answers) < 2:
-            raise ValueError("Question must have at least 2 answers")
+            if not poll_answers or len(poll_answers) < 2:
+                raise ValueError("Question must have at least 2 answers")
 
-        poll_duration_in_minutes = int(raw_form_data["poll_duration"])
-    elif name:
-        ap_type = "Article"
+            poll_duration_in_minutes = int(raw_form_data["poll_duration"])
+        elif name:
+            ap_type = "Article"
 
-    public_id = await boxes.send_create(
-        db_session,
-        ap_type=ap_type,
-        source=content,
-        uploads=uploads,
-        in_reply_to=in_reply_to or None,
-        visibility=ap.VisibilityEnum[visibility],
-        content_warning=content_warning or None,
-        is_sensitive=True if content_warning else is_sensitive,
-        poll_type=poll_type,
-        poll_answers=poll_answers,
-        poll_duration_in_minutes=poll_duration_in_minutes,
-        name=name,
-    )
-    return RedirectResponse(
-        request.url_for("outbox_by_public_id", public_id=public_id),
-        status_code=302,
-    )
+        public_id = await boxes.send_create(
+            db_session,
+            ap_type=ap_type,
+            source=content,
+            uploads=uploads,
+            in_reply_to=in_reply_to or None,
+            visibility=ap.VisibilityEnum[visibility],
+            content_warning=content_warning or None,
+            is_sensitive=True if content_warning else is_sensitive,
+            poll_type=poll_type,
+            poll_answers=poll_answers,
+            poll_duration_in_minutes=poll_duration_in_minutes,
+            name=name,
+        )
+        return RedirectResponse(
+            request.url_for("outbox_by_public_id", public_id=public_id),
+            status_code=302,
+        )
 
 
 @router.post("/actions/vote")

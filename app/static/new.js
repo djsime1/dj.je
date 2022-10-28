@@ -28,7 +28,7 @@ var ji = function (ev) {
 // Enable the click for each emojis
 var items = document.getElementsByClassName("ji")
 for (var i = 0; i < items.length; i++) {
-    items[i].addEventListener('click', ji);
+    items[i].addEventListener("click", ji);
 }
 
 // Add new input text dynamically to allow setting an alt text on attachments
@@ -54,3 +54,21 @@ files.addEventListener("change", function(e) {
 const end = ta.value.length;
 ta.setSelectionRange(end, end);
 ta.focus();
+
+// Unsaved changes popup when text is present in the textarea
+var submit = document.getElementById("submit");
+var haschanges = false;
+
+ta.addEventListener("input", function(e) {
+    haschanges = ta.value != "";
+});
+
+submit.addEventListener("click", function(e) {
+    haschanges = false;
+});
+
+window.addEventListener("beforeunload", function (e) {
+    if (haschanges) {
+        e.preventDefault();
+    }
+});

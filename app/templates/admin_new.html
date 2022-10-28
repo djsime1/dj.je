@@ -1,6 +1,12 @@
 {%- import "utils.html" as utils with context -%}
 {% extends "layout.html" %}
 
+{% set editing = request.query_params.editing %}
+
+{% macro disable_in_edit() %}
+{% if editing %} disabled{% endif %}
+{% endmacro %}
+
 {% block head %}
 <title>{{ local_actor.display_name }} - New</title>
 {% endblock %}
@@ -13,6 +19,10 @@
 {% endif %}
 
 <div class="box">
+
+{% if editing %}
+<span>Editing <a href="{{ editing }}">this {{ request.query_params.type | lower }}</a>.</span>
+{% else %}
 <nav class="flexbox">
 <ul>
 {% for ap_type in ["Note", "Article", "Question"] %}
@@ -23,6 +33,8 @@
 {% endfor %}
 </ul>
 </nav>
+{% endif %}
+
 
 
 <form class="form admin-new" action="{{ request.url_for("admin_actions_new") }}" enctype="multipart/form-data" method="POST">
@@ -38,7 +50,7 @@
 
     {% if request.query_params.type == "Article" %}
     <p>
-        <input type="text" class="width-95" name="name" placeholder="Title">
+        <input type="text" class="width-95" name="name" placeholder="Title"{% if content_title %} value="{{ content_title }}"{% endif %}>
     </p>
     {% endif %}
 
@@ -75,18 +87,19 @@
     {% endif %}
 
     <p>
-    <input type="text" name="content_warning" placeholder="content warning (will mark the post as sensitive)"{% if content_warning %} value="{{ content_warning }}"{% endif %} class="width-95">
+        <input type="text" name="content_warning" placeholder="content warning (will mark the post as sensitive)"{% if content_warning %} value="{{ content_warning }}"{% endif %} class="width-95">
     </p>
     <p>
         <input type="checkbox" name="is_sensitive" id="is_sensitive"> <label for="is_sensitive">Mark attachment(s) as sensitive</label>
     </p>
     <input type="hidden" name="in_reply_to" value="{{ request.query_params.in_reply_to }}">
+    <input type="hidden" name="editing" value="{{ request.query_params.editing }}">
     <p>
         <input id="files" name="files" type="file" class="width-95" multiple>
     </p>
     <div id="alts"></div>
     <p>
-        <input type="submit" value="Publish">
+        <input id="submit" type="submit" value="{{ 'Update' if editing else 'Publish' }}">
     </p>
 </form>
 </div>

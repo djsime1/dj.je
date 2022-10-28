@@ -105,6 +105,15 @@
 </form>
 {% endmacro %}
 
+{% macro admin_edit_button(ap_object) %}
+<form action="/admin/new"  method="GET">
+<input type="hidden" name="editing" value="{{ ap_object.ap_id }}">
+<input type="hidden" name="type" value="{{ ap_object.ap_type }}">
+<input type="hidden" name="with_visibility" value="{{ ap_object.visibility.name }}">
+<button type="submit">edit</button>
+</form> 
+{% endmacro %}
+
 {% macro admin_announce_button(ap_object_id, permalink_id=None) %}
 <form action="{{ request.url_for("admin_actions_announce") }}" method="POST">
     {{ embed_csrf_token() }}
@@ -547,6 +556,9 @@
     <nav class="flexbox activity-bar">
     <ul>
         {% if object.is_from_outbox %}
+            <li>
+                {{ admin_edit_button(object) }}
+            </li>
             <li>
                 {{ admin_delete_button(object) }}
             </li>
