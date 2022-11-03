@@ -2484,7 +2484,9 @@ async def get_replies_tree(
                     .where(
                         models.InboxObject.conversation
                         == requested_object.conversation,
-                        models.InboxObject.ap_type.in_(["Note", "Page", "Article"]),
+                        models.InboxObject.ap_type.in_(
+                            ["Note", "Page", "Article", "Question"]
+                        ),
                         models.InboxObject.is_deleted.is_(False),
                         models.InboxObject.visibility.in_(allowed_visibility),
                     )
@@ -2502,7 +2504,9 @@ async def get_replies_tree(
                         models.OutboxObject.conversation
                         == requested_object.conversation,
                         models.OutboxObject.is_deleted.is_(False),
-                        models.OutboxObject.ap_type.in_(["Note", "Page", "Article"]),
+                        models.OutboxObject.ap_type.in_(
+                            ["Note", "Page", "Article", "Question"]
+                        ),
                         models.OutboxObject.visibility.in_(allowed_visibility),
                     )
                     .options(
