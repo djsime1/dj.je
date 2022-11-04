@@ -62,13 +62,8 @@ def _filter_domain(text: str) -> str:
 
 def _media_proxy_url(url: str | None) -> str:
     if not url:
-        return "/static/nopic.png"
-
-    if url.startswith(BASE_URL):
-        return url
-
-    encoded_url = base64.urlsafe_b64encode(url.encode()).decode()
-    return f"/proxy/media/{encoded_url}"
+        return BASE_URL + "/static/nopic.png"
+    return proxied_media_url(url)
 
 
 def is_current_user_admin(request: Request) -> bool:
