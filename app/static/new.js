@@ -45,7 +45,7 @@ files.addEventListener("change", function(e) {
         altInput.setAttribute("type", "text");
         altInput.setAttribute("name", "alt_" + e.target.files[i].name);
         altInput.setAttribute("placeholder", "Alt text for " + e.target.files[i].name);
-        altInput.setAttribute("style", "width:95%;")
+        altInput.setAttribute("class", "width-95")
         p.appendChild(altInput);
         alts.appendChild(p);
     }
