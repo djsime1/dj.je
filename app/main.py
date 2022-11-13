@@ -1,5 +1,4 @@
 import base64
-import html
 import os
 import sys
 import time
@@ -40,7 +39,6 @@ from starlette.background import BackgroundTask
 from starlette.datastructures import Headers
 from starlette.datastructures import MutableHeaders
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from starlette.responses import HTMLResponse
 from starlette.responses import JSONResponse
 from starlette.types import Message
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware  # type: ignore
@@ -248,7 +246,11 @@ class ActivityPubResponse(JSONResponse):
     media_type = "application/activity+json"
 
 
-class HTMLRedirectResponse(HTMLResponse):
+async def redirect_to_remote_instance(
+    request: Request,
+    db_session: AsyncSession,
+    url: str,
+) -> templates.TemplateResponse:
     """
     Similar to RedirectResponse, but uses a 200 response with HTML.
 
@@ -256,15 +258,16 @@ class HTMLRedirectResponse(HTMLResponse):
     since our CSP policy disallows remote form submission.
     https://github.com/w3c/webappsec-csp/issues/8#issuecomment-810108984
     """
-
-    def __init__(
-        self,
-        url: str,
-    ) -> None:
-        super().__init__(
-            content=f'<a href="{html.escape(url)}">Continue to remote resource</a>',
-            headers={"Refresh": "0;url=" + url},
-        )
+    return await templates.render_template(
+        db_session,
+        request,
+        "redirect_to_remote_instance.html",
+        {
+            "request": request,
+            "url": url,
+        },
+        headers={"Refresh": "0;url=" + url},
+    )
 
 
 @app.get("/")
@@ -976,9 +979,10 @@ async def get_remote_follow(
 @app.post("/remote_follow")
 async def post_remote_follow(
     request: Request,
+    db_session: AsyncSession = Depends(get_db_session),
     csrf_check: None = Depends(verify_csrf_token),
     profile: str = Form(),
-) -> HTMLRedirectResponse:
+) -> templates.TemplateResponse:
     if not profile.startswith("@"):
         profile = f"@{profile}"
 
@@ -987,7 +991,9 @@ async def post_remote_follow(
         # TODO(ts): error message to user
         raise HTTPException(status_code=404)
 
-    return HTMLRedirectResponse(
+    return await redirect_to_remote_instance(
+        request,
+        db_session,
         remote_follow_template.format(uri=ID),
     )
 
@@ -1016,10 +1022,11 @@ async def remote_interaction(
 @app.post("/remote_interaction")
 async def post_remote_interaction(
     request: Request,
+    db_session: AsyncSession = Depends(get_db_session),
     csrf_check: None = Depends(verify_csrf_token),
     profile: str = Form(),
     ap_id: str = Form(),
-) -> RedirectResponse:
+) -> templates.TemplateResponse:
     if not profile.startswith("@"):
         profile = f"@{profile}"
 
@@ -1028,9 +1035,10 @@ async def post_remote_interaction(
         # TODO(ts): error message to user
         raise HTTPException(status_code=404)
 
-    return RedirectResponse(
-        remote_follow_template.format(uri=ap_id),
-        status_code=302,
+    return await redirect_to_remote_instance(
+        request,
+        db_session,
+        remote_follow_template.format(uri=ID),
     )
 
 
