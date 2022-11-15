@@ -455,6 +455,7 @@ async def admin_direct_messages(
                     models.InboxObject.ap_context.is_not(None),
                     # Skip transient object like poll relies
                     models.InboxObject.is_transient.is_(False),
+                    models.InboxObject.is_deleted.is_(False),
                 )
                 .group_by(models.InboxObject.ap_context, models.InboxObject.actor_id)
             )
@@ -477,6 +478,7 @@ async def admin_direct_messages(
                     models.OutboxObject.ap_context.is_not(None),
                     # Skip transient object like poll relies
                     models.OutboxObject.is_transient.is_(False),
+                    models.OutboxObject.is_deleted.is_(False),
                 )
                 .group_by(models.OutboxObject.ap_context)
             )
